@@ -1,10 +1,18 @@
 from random import randint
+import hashlib
 
-'''def RSA_sign(text, d, n):
+def RSA_sign(text, d, n):
+	hash_text = hashlib.md5(str(text))
 	return (text**d) % n
 
 def RSA_sign_verify(signature, e, n):
-	return (signature**e) % n'''
+	return (signature**e) % n
+
+def ElGamal_sign():
+	return 0
+
+def ElGamal_sign_verify():
+	return 0
 
 #Source for ExtEuclideanAlg and modInvEuclid from https://numericalrecipes.wordpress.com/tag/modular-multiplicative-inverse/
 def extEuclideanAlg(a, b) :
@@ -28,11 +36,14 @@ def modInvEuclid(a,m) :
     else :
         return None
 
-def find_multiplicative_inverse(euler_totient):
-	inverse1 = 54#randint(2,euler_totient-1)
-	inverse2 = None
-	while (inverse2 is None):
+def find_multiplicative_inverse(euler_totient, inverse1 = None):
+	if inverse1 == None:
 		inverse1 = randint(2,euler_totient-1)
+		inverse2 = None
+		while (inverse2 is None):
+			inverse1 = randint(2,euler_totient-1)
+			inverse2 = modInvEuclid(inverse1, euler_totient)
+	else:
 		inverse2 = modInvEuclid(inverse1, euler_totient)
 	return inverse1, inverse2
 
@@ -48,7 +59,7 @@ def RSA_compute_keys(p, q):
 	return n, e, d
 
 def ElGamal_compute_keys(p,g):
-	private_key = 43 #randint(1,100)
+	private_key = randint(1,100)
 	public_key = (g**private_key)%p
 	return private_key, public_key
 
@@ -72,10 +83,12 @@ def ElGamal_encrypt(plaintext, prime1, prime2, public_key):
 	return cipher, u, k
 
 def ElGamal_decrypt(ciphertext, u, private_key, public_key, k, prime1):
-	x = u**private_key
-	print "u^a = ", u, " ^ ", private_key, " = ", x%prime1, " mod p"
-	inverse1, inverse2 = find_multiplicative_inverse(prime1)
+	x = (u**private_key)%prime1
+	print "u^a = ", u, " ^ ", private_key, " = ", x, " mod p"
+	inverse1, inverse2 = find_multiplicative_inverse(prime1, x)
+	print x%prime1, "^-1 = ", inverse2, " mod p"
 	plaintext = (ciphertext * inverse2)%prime1
+	print "P = C(u^a)^-1 = ", ciphertext, "x", inverse2, " = ", plaintext, " mod p"
 	print "decryption: ", plaintext
 	return plaintext
 
@@ -84,13 +97,13 @@ def rsa_main():
 	prime1, prime2 = choose_primes()
 	public1, public2, private = RSA_compute_keys(prime1, prime2)
 	print "PERSON ONE SENDS:", plaintext 
-	#signature = RSA_sign(plaintext, private, public1)
-	#print "SIGNATURE IS: ", signature
+	signature = RSA_sign(plaintext, private, public1)
+	print "SIGNATURE IS: ", signature
 	cipher = RSA_encrypt(public1, public2, plaintext)
 	print "PERSON TWO RECIEVES: ", cipher
 	decrypted_msg = RSA_decrypt(private, public1, cipher)
-	#verification = RSA_sign_verify(signature, public2, public1)
-	#print "SIGNATURE VERIFICATION: ", verification
+	verification = RSA_sign_verify(signature, public2, public1)
+	print "SIGNATURE VERIFICATION: ", verification
 
 
 def gamal_main():
@@ -104,5 +117,5 @@ def gamal_main():
 
 
 
-#rsa_main()
-gamal_main()
+rsa_main()
+#gamal_main()
