@@ -1,26 +1,40 @@
 from random import randint
 
-def gcd(e, i):
-	temp1 = e
-	temp2 = i
-	remainder = temp1%temp2
-	while(remainder != 0):	
-		temp1 = temp2
-		temp2 = remainder
-		remainder = temp1%temp2
+'''def RSA_sign(text, d, n):
+	return (text^d) % n
 
-	return temp1
+def RSA_sign_verify(signature, e, d):
+	return (text^e) % n'''
+
+#Source for ExtEuclideanAlg and modInvEuclid from https://numericalrecipes.wordpress.com/tag/modular-multiplicative-inverse/
+def extEuclideanAlg(a, b) :
+    """
+    Computes a solution  to a x + b y = gcd(a,b), as well as gcd(a,b)
+    """
+    if b == 0 :
+        return 1,0,a
+    else :
+        x, y, gcd = extEuclideanAlg(b, a % b)
+        return y, x - y * (a // b),gcd
+ 
+def modInvEuclid(a,m) :
+    """
+    Computes the modular multiplicative inverse of a modulo m,
+    using the extended Euclidean algorithm
+    """
+    x,y,gcd = extEuclideanAlg(a,m)
+    if gcd == 1 :
+        return x % m
+    else :
+        return None
 
 def find_multiplicative_inverse(euler_totient):
-	inverse1 = 5 #randint(2,9)
-	inverse2 = 0
-	for each in xrange(0, euler_totient):
-		answer = (inverse1*each) % euler_totient
-		if answer == 1:
-			inverse2 = each
-			break
+	inverse1 = randint(2,euler_totient-1)
+	inverse2 = None
+	while (inverse2 is None):
+		inverse1 = randint(2,euler_totient-1)
+		inverse2 = modInvEuclid(inverse1, euler_totient)
 	return inverse1, inverse2
-	
 
 def choose_primes():
 	number1 = input("Please enter a 4 digit prime: ")
@@ -48,9 +62,12 @@ def rsa_main():
 	prime1, prime2 = choose_primes()
 	public1, public2, private = compute_keys(prime1, prime2)
 	print "PERSON ONE SENDS:", plaintext 
+	#signature = RSA_sign(plaintext, private, public1)
+	#print "SIGNATURE IS: ", signature
 	cipher = encrypt(public1, public2, plaintext)
 	print "PERSON TWO RECIEVES: ", cipher
 	decrypted_msg = decrypt(private, public1, cipher)
-	print (decrypted_msg)
+	#verification = RSA_sign_verify(signature, public2, public1)
+	#print "SIGNATURE VERIFICATION: ", verification
 
 rsa_main()
