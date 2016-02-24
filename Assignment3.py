@@ -9,20 +9,23 @@ def RSA_sign_verify(signature, e, n):
 	return (signature**e) % n
 
 def ElGamal_sign(text, prime1, prime2, private_key):
-	k = 5#randint(1, prime1-1)
+	temp = prime1 - 1
+	k = randint(1, temp)
 	u = (prime2**k) % prime1
 	print "u = g^k = ", prime2, "^", k, " = ", u, " mod ", prime1
-	inverse1, inverse2 = find_multiplicative_inverse(prime1-1, k)
-	print "k^-1 = ", inverse2, " mod ", prime1-1
-	signature = ((text - (private_key*u))* inverse2) % (prime1-1)
-	print "\nS = (M-au)k^-1 = (", text, " - ", private_key, "x", u, ") x", inverse2, " = ", signature, " mod ", prime1-1 
+	inverse1, inverse2 = find_multiplicative_inverse(temp, k)
+	print "k^-1 = ", inverse2, " mod ", temp
+	signature = ((text - (private_key*u))* inverse2) % (temp-1)
+	print "\nS = (M-au)k^-1 = (", text, " - ", private_key, "x", u, ") x", inverse2, " = ", signature, " mod ", temp 
 	return signature
 
 #u = g^k mod p
 #public_key(alpha) = g^a mod prime1
-def ElGamal_sign_verify(text, signature, u, public_key, prime1):
+def ElGamal_sign_verify(text, signature, u, public_key, prime1, prime2):
 	verification = ((public_key**u)*(u**signature)) % prime1
 	print "\n(alpha^u)*(u^S) = (", public_key, "^", u, ") x (", u, "^", signature, ") = ", verification, " mod ", prime1 
+	gh = (prime2**text) % prime1
+	print "g^h = ", prime2, "^", text, "=", gh, " mod ", prime1
 	return verification
 
 #Source for ExtEuclideanAlg and modInvEuclid from https://numericalrecipes.wordpress.com/tag/modular-multiplicative-inverse/
@@ -48,9 +51,10 @@ def modInvEuclid(a,m) :
         return None
 
 def find_multiplicative_inverse(euler_totient, inverse1 = None):
+	inverse2 = None
+
 	if inverse1 == None:
 		inverse1 = randint(2,euler_totient-1)
-		inverse2 = None
 		while (inverse2 is None):
 			inverse1 = randint(2,euler_totient-1)
 			inverse2 = modInvEuclid(inverse1, euler_totient)
@@ -70,7 +74,7 @@ def RSA_compute_keys(p, q):
 	return n, e, d
 
 def ElGamal_compute_keys(p,g):
-	private_key = 43#randint(1,100)
+	private_key = randint(1,100)
 	public_key = (g**private_key)%p
 	return private_key, public_key
 
@@ -85,7 +89,7 @@ def RSA_decrypt(private, key1, cipher):
 	return msg
 
 def ElGamal_encrypt(plaintext, prime1, prime2, public_key):
-	k = 5#randint(1, prime1)
+	k = randint(1, prime1)
 	cipher = (plaintext * (public_key**k)) % prime1
 	u = (prime2 ** k) % prime1
 	print "u = g^k = ", prime2, "^", k, " = ", u, " mod ", prime1 
@@ -129,7 +133,7 @@ def gamal_main():
 
 	print "\nPERSON TWO RECIEVES: ", cipher, "and", u
 	decrypted_msg = ElGamal_decrypt(cipher, u, private_key, public_key, k, prime1)
-	verification = ElGamal_sign_verify(plaintext, signature, u, public_key, prime1)
+	verification = ElGamal_sign_verify(plaintext, signature, u, public_key, prime1, prime2)
 	print "SIGNATURE VERIFICATION: ", verification
 
 
