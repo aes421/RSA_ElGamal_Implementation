@@ -15,11 +15,15 @@ def ElGamal_sign(text, prime1, prime2, private_key):
 	inverse1, inverse2 = find_multiplicative_inverse(prime1-1, k)
 	print "k^-1 = ", inverse2, " mod ", prime1-1
 	signature = ((text - (private_key*u))* inverse2) % (prime1-1)
-	print "S = (M-au)k^-1 = (", text, " - ", private_key, "x", u, ") x", inverse2, " = ", signature, " mod ", prime1-1  
+	print "\nS = (M-au)k^-1 = (", text, " - ", private_key, "x", u, ") x", inverse2, " = ", signature, " mod ", prime1-1 
 	return signature
 
-def ElGamal_sign_verify():
-	return 0
+#u = g^k mod p
+#public_key(alpha) = g^a mod prime1
+def ElGamal_sign_verify(text, signature, u, public_key, prime1):
+	verification = ((public_key**u)*(u**signature)) % prime1
+	print "\n(alpha^u)*(u^S) = (", public_key, "^", u, ") x (", u, "^", signature, ") = ", verification, " mod ", prime1 
+	return verification
 
 #Source for ExtEuclideanAlg and modInvEuclid from https://numericalrecipes.wordpress.com/tag/modular-multiplicative-inverse/
 def extEuclideanAlg(a, b) :
@@ -117,15 +121,16 @@ def gamal_main():
 	plaintext = input("Please enter a number for your message: ")
 	prime1, prime2 = choose_primes()
 	private_key, public_key = ElGamal_compute_keys(prime1, prime2)
-	print "PERSON ONE SENDS:", plaintext 
+	print "\n\nPERSON ONE SENDS:", plaintext 
 	signature = ElGamal_sign(plaintext, prime1, prime2, private_key)
 	print "SIGNATURE IS: ", signature, "\n"
 	
 	cipher, u, k = ElGamal_encrypt(plaintext, prime1, prime2, public_key)
 
-	print "\nPERSON TWO RECIEVES: ", cipher, "and",
+	print "\nPERSON TWO RECIEVES: ", cipher, "and", u
 	decrypted_msg = ElGamal_decrypt(cipher, u, private_key, public_key, k, prime1)
-
+	verification = ElGamal_sign_verify(plaintext, signature, u, public_key, prime1)
+	print "SIGNATURE VERIFICATION: ", verification
 
 
 #rsa_main()
