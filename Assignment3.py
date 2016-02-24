@@ -2,14 +2,21 @@ from random import randint
 import hashlib
 
 def RSA_sign(text, d, n):
-	hash_text = hashlib.md5(str(text))
+	#hash_text = hashlib.md5(str(text))
 	return (text**d) % n
 
 def RSA_sign_verify(signature, e, n):
 	return (signature**e) % n
 
-def ElGamal_sign():
-	return 0
+def ElGamal_sign(text, prime1, prime2, private_key):
+	k = 5#randint(1, prime1-1)
+	u = (prime2**k) % prime1
+	print "u = g^k = ", prime2, "^", k, " = ", u, " mod ", prime1
+	inverse1, inverse2 = find_multiplicative_inverse(prime1-1, k)
+	print "k^-1 = ", inverse2, " mod ", prime1-1
+	signature = ((text - (private_key*u))* inverse2) % (prime1-1)
+	print "S = (M-au)k^-1 = (", text, " - ", private_key, "x", u, ") x", inverse2, " = ", signature, " mod ", prime1-1  
+	return signature
 
 def ElGamal_sign_verify():
 	return 0
@@ -59,7 +66,7 @@ def RSA_compute_keys(p, q):
 	return n, e, d
 
 def ElGamal_compute_keys(p,g):
-	private_key = randint(1,100)
+	private_key = 43#randint(1,100)
 	public_key = (g**private_key)%p
 	return private_key, public_key
 
@@ -111,11 +118,15 @@ def gamal_main():
 	prime1, prime2 = choose_primes()
 	private_key, public_key = ElGamal_compute_keys(prime1, prime2)
 	print "PERSON ONE SENDS:", plaintext 
+	signature = ElGamal_sign(plaintext, prime1, prime2, private_key)
+	print "SIGNATURE IS: ", signature, "\n"
+	
 	cipher, u, k = ElGamal_encrypt(plaintext, prime1, prime2, public_key)
-	print "PERSON TWO RECIEVES: ", cipher, "and", u
+
+	print "\nPERSON TWO RECIEVES: ", cipher, "and",
 	decrypted_msg = ElGamal_decrypt(cipher, u, private_key, public_key, k, prime1)
 
 
 
-rsa_main()
-#gamal_main()
+#rsa_main()
+gamal_main()
