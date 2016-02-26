@@ -10,10 +10,13 @@ def RSA_sign_verify(signature, e, n):
 
 def ElGamal_sign(text, prime1, prime2, private_key):
 	temp = prime1 - 1
-	k = randint(1, temp)
+	#T0-DO: if no inverse is found change k
+	inverse2 = None
+	while (inverse2 == None):
+		k = randint(1, temp)
+		inverse1, inverse2 = find_multiplicative_inverse(temp, k)
 	u = (prime2**k) % prime1
 	print "u = g^k = ", prime2, "^", k, " = ", u, " mod ", prime1
-	inverse1, inverse2 = find_multiplicative_inverse(temp, k)
 	print "k^-1 = ", inverse2, " mod ", temp
 	signature = ((text - (private_key*u))* inverse2) % (temp-1)
 	print "\nS = (M-au)k^-1 = (", text, " - ", private_key, "x", u, ") x", inverse2, " = ", signature, " mod ", temp 
