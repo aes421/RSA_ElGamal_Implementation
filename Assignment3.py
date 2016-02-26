@@ -18,7 +18,7 @@ def ElGamal_sign(text, prime1, prime2, private_key):
 	u = (prime2**k) % prime1
 	print "u = g^k = ", prime2, "^", k, " = ", u, " mod ", prime1
 	print "k^-1 = ", inverse2, " mod ", temp
-	signature = ((text - (private_key*u))* inverse2) % (temp-1)
+	signature = ((text - (private_key*u))* inverse2) % temp
 	print "\nS = (M-au)k^-1 = (", text, " - ", private_key, "x", u, ") x", inverse2, " = ", signature, " mod ", temp 
 	return signature
 
@@ -115,13 +115,16 @@ def rsa_main():
 	prime1, prime2 = choose_primes()
 	public1, public2, private = RSA_compute_keys(prime1, prime2)
 	print "PERSON ONE SENDS:", plaintext 
+	print("\n")
 	signature = RSA_sign(plaintext, private, public1)
 	print "SIGNATURE IS: ", signature
 	cipher = RSA_encrypt(public1, public2, plaintext)
+	print("\n")
 	print "PERSON TWO RECIEVES: ", cipher
 	decrypted_msg = RSA_decrypt(private, public1, cipher)
+	print("\n")
 	verification = RSA_sign_verify(signature, public2, public1)
-	print "SIGNATURE VERIFICATION: ", verification
+	print "SIGNATURE VERIFICATION: ", verification, "\n\n"
 
 
 def gamal_main():
@@ -137,8 +140,12 @@ def gamal_main():
 	print "\nPERSON TWO RECIEVES: ", cipher, "and", u
 	decrypted_msg = ElGamal_decrypt(cipher, u, private_key, public_key, k, prime1)
 	verification = ElGamal_sign_verify(plaintext, signature, u, public_key, prime1, prime2)
-	print "SIGNATURE VERIFICATION: ", verification
+	print "SIGNATURE VERIFICATION: ", verification, "\n\n"
 
-
-#rsa_main()
-gamal_main()
+answer = None
+while (answer != 0):
+	answer = input("Press 0 to exit\nPress 1 for RSA\nPress 2 for El Gamal\n")
+	if (answer == 1):
+		rsa_main()
+	elif (answer == 2):
+		gamal_main()
