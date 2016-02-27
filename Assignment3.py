@@ -20,15 +20,15 @@ def ElGamal_sign(text, prime1, prime2, private_key):
 	print "k^-1 = ", inverse2, " mod ", temp
 	signature = ((text - (private_key*u))* inverse2) % temp
 	print "\nS = (M-au)k^-1 = (", text, " - ", private_key, "x", u, ") x", inverse2, " = ", signature, " mod ", temp 
-	return signature
+	return signature, k
 
 #u = g^k mod p
 #public_key(alpha) = g^a mod prime1
 def ElGamal_sign_verify(text, signature, u, public_key, prime1, prime2):
 	verification = ((public_key**u)*(u**signature)) % prime1
 	print "\n(alpha^u)*(u^S) = (", public_key, "^", u, ") x (", u, "^", signature, ") = ", verification, " mod ", prime1 
-	gh = (prime2**text) % prime1
-	print "g^h = ", prime2, "^", text, "=", gh, " mod ", prime1
+	gm = (prime2**text) % prime1
+	print "g^m = ", prime2, "^", text, "=", gm, " mod ", prime1
 	return verification
 
 #Source for ExtEuclideanAlg and modInvEuclid from https://numericalrecipes.wordpress.com/tag/modular-multiplicative-inverse/
@@ -77,7 +77,7 @@ def RSA_compute_keys(p, q):
 	return n, e, d
 
 def ElGamal_compute_keys(p,g):
-	private_key = randint(1,100)
+	private_key = randint(1,p-1)
 	public_key = (g**private_key)%p
 	return private_key, public_key
 
@@ -91,14 +91,13 @@ def RSA_decrypt(private, key1, cipher):
 	print "decryption:", cipher, "^", private, "mod", key1, "=", msg
 	return msg
 
-def ElGamal_encrypt(plaintext, prime1, prime2, public_key):
-	k = randint(1, prime1)
+def ElGamal_encrypt(plaintext, prime1, prime2, public_key, k):
 	cipher = (plaintext * (public_key**k)) % prime1
 	u = (prime2 ** k) % prime1
 	print "u = g^k = ", prime2, "^", k, " = ", u, " mod ", prime1 
 	print "public key = ", public_key, "^", k, " = ", (public_key**k)%prime1 ," mod ", prime1
 	print "C = ", plaintext, "x", (public_key**k)%prime1, " = ", cipher, " mod ", prime1
-	return cipher, u, k
+	return cipher, u
 
 def ElGamal_decrypt(ciphertext, u, private_key, public_key, k, prime1):
 	x = (u**private_key)%prime1
@@ -132,15 +131,18 @@ def gamal_main():
 	prime1, prime2 = choose_primes()
 	private_key, public_key = ElGamal_compute_keys(prime1, prime2)
 	print "\n\nPERSON ONE SENDS:", plaintext 
-	signature = ElGamal_sign(plaintext, prime1, prime2, private_key)
+	signature, k = ElGamal_sign(plaintext, prime1, prime2, private_key)
 	print "SIGNATURE IS: ", signature, "\n"
 	
-	cipher, u, k = ElGamal_encrypt(plaintext, prime1, prime2, public_key)
+	cipher, u= ElGamal_encrypt(plaintext, prime1, prime2, public_key, k)
 
 	print "\nPERSON TWO RECIEVES: ", cipher, "and", u
 	decrypted_msg = ElGamal_decrypt(cipher, u, private_key, public_key, k, prime1)
 	verification = ElGamal_sign_verify(plaintext, signature, u, public_key, prime1, prime2)
 	print "SIGNATURE VERIFICATION: ", verification, "\n\n"
+
+
+
 
 answer = None
 while (answer != 0):
